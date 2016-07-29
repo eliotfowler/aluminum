@@ -57,7 +57,8 @@ expression : '-' expression                           #unaryMinusExpression
 // Utilities
 exprList : expression (',' expression)*;
 idList : Identifier (',' Identifier)*;
-block : Do statements End;
+block : Do Newline statements End;
+
 
 // Operators
 Or       : '||';
