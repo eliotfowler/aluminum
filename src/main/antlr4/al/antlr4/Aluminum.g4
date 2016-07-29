@@ -2,7 +2,7 @@ grammar Aluminum;
 
 program : statements;
 
-statements : (statement terminator)*;
+statements : (statement terminator)* (Return expression)?;
 
 statement : assignment
           | ifStatement
@@ -23,7 +23,7 @@ whileStatement : While expression block;
 functionCall : Identifier arguments;
 arguments : '(' exprList? ')';
 
-functionDecl : Def Identifier parameters;
+functionDecl : Def Identifier parameters block;
 parameters : '(' idList? ')';
 
 // Expressions
@@ -95,6 +95,7 @@ If       : 'if';
 While    : 'while';
 End      : 'end';
 Do       : 'do';
+Return   : 'return';
 
 // Lexer regex
 Boolean : 'true' | 'false';
