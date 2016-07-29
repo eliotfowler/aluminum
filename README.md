@@ -24,6 +24,9 @@ What doesn't work that you would otherwise expect to
 Sample Aluminum Code:
 =====================
 
+Source
+------
+
 ```
 def print_hello() do
 	print("hello")
@@ -34,6 +37,23 @@ while(i < 10) do
 	i = i + 1
 end
 print("done")
+```
+
+Output
+------
+
+```
+hello
+hello
+hello
+hello
+hello
+hello
+hello
+hello
+hello
+hello
+done
 ```
 
 Philosophies/Features
