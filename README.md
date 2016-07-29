@@ -6,32 +6,28 @@ I want a language that Java programmers will feel home using, that doesn't have 
 Philosophies/Features
 ============
 
-Static typing
-Inferred typing where possible
-Optimize for programmer happiness (I want keywords like unless and ?)
-Pattern matching
-Functions are first-class objects
-Small boilerplate, fast to create new applications
-Incorporate Contract Programming and unit testing methodology
-Be able to build lightweight, standalone programs
-Nested Functions
-Functions literals
-Automatic memory management
-Unit tests as a first priority
-Exceptions
-Protected by default (like Java, not Swift)
-English words as keywords: and, or, etc
+- Static typing
+- Inferred typing where possible
+- Optimize for programmer happiness (I want keywords like unless and ?)
+- Pattern matching
+- Functions are first-class objects
+- Small boilerplate, fast to create new applications
+- Incorporate Contract Programming and unit testing methodology
+- Be able to build lightweight, standalone programs
+- Nested Functions
+- Functions literals
+- Automatic memory management
+- Unit tests as a first priority
+- Exceptions
+- Protected by default (like Java, not Swift)
+- English words as keywords: and, or, etc
 
 Inspiration
 -----------
 
-Scala's maybe
-Ruby's unless
-Java's generics
-Swift's type system
-I like the ! in ruby functions to say "make this work or error" and have it be more lenient otherwise
-I like the _ in swift for I don't care about this variable
-
-Maybe
------
-weak types -- if I use a variable without declaring it first, then it can accept any type, like Ruby
+- Scala's maybe
+- Ruby's unless
+- Java's generics
+- Swift's type system
+- I like the ! in ruby functions to say "make this work or error" and have it be more lenient otherwise
+- I like the _ in swift for I don't care about this variable
