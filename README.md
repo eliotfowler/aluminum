@@ -5,13 +5,17 @@ I want a language that Java programmers will feel home using, that doesn't have 
 
 **Note: This is a very early stage WIP**
 
-What works:
+What works
+----------
+
  - function declaration
  - if statements
  - while loops
  - assignments
  
-What doesn't work that you would otherwise expect to:
+What doesn't work that you would otherwise expect to
+----------------------------------------------------
+
  - empty newlines
  - no newline at the EOF
  - semi-colons as a terminator
