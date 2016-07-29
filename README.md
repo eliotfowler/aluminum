@@ -3,6 +3,20 @@ What do I want?
 
 I want a language that Java programmers will feel home using, that doesn't have all the nasty "!= null" checks, that also has the ease-of-use that I love about Ruby.
 
+**Note: This is a very early stage WIP**
+
+What works:
+ - function declaration
+ - if statements
+ - while loops
+ - assignments
+ 
+ What doesn't work that you would otherwise expect to:
+ - empty newlines
+ - no newline at the EOF
+ - semi-colons as a terminator
+ - pretty much everything else
+
 Philosophies/Features
 ============
 
