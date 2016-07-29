@@ -313,7 +313,7 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 	public ALObject visitFunctionCall(FunctionCallContext ctx) {
 		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
 		
-		if (ctx.arguments() != null) {
+		if (ctx.arguments().exprList() != null) {
 			args = ctx.arguments().exprList().expression();
 		}
 		

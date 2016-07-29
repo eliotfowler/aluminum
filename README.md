@@ -11,11 +11,26 @@ What works:
  - while loops
  - assignments
  
- What doesn't work that you would otherwise expect to:
+What doesn't work that you would otherwise expect to:
  - empty newlines
  - no newline at the EOF
  - semi-colons as a terminator
  - pretty much everything else
+ 
+Sample Aluminum Code:
+=====================
+
+```
+def print_hello() do
+	print("hello")
+end
+i = 0
+while(i < 10) do
+	print_hello
+	i = i + 1
+end
+print("done")
+```
 
 Philosophies/Features
 ============

@@ -10,7 +10,7 @@ public class AluminumRunner
 {
     public static void main( String[] args) throws Exception 
     {
-        AluminumLexer lexer = new AluminumLexer(new ANTLRFileStream("test/samples/ensure.al"));
+        AluminumLexer lexer = new AluminumLexer(new ANTLRFileStream("test/samples/while.al"));
         AluminumParser parser = new AluminumParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.program();
         
