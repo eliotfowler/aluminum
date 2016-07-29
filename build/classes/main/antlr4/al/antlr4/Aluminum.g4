@@ -2,7 +2,7 @@ grammar Aluminum;
 
 program : statements;
 
-statements : (statement terminator)* (Return expression)?;
+statements : (statement? terminator)* (Return expression)?;
 
 statement : assignment
           | ifStatement

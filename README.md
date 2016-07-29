@@ -16,7 +16,6 @@ What works
 What doesn't work that you would otherwise expect to
 ----------------------------------------------------
 
- - empty newlines
  - no newline at the EOF
  - semi-colons as a terminator
  - pretty much everything else
@@ -31,11 +30,14 @@ Source
 def print_hello() do
 	print("hello")
 end
+
 i = 0
 while(i < 10) do
 	print_hello
 	i = i + 1
 end
+
+
 print("done")
 ```
 
