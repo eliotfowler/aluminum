@@ -42,4 +42,14 @@ public class ALFunction {
 		
 		return retVal;
 	}
+	
+	@Override
+	public String toString() {
+		String paramsString = "";
+		if (params != null) {
+			paramsString = params.toString(); 
+		}
+		
+		return "ALFunction::" + name + "(" + paramsString + ")";
+	}
 }
