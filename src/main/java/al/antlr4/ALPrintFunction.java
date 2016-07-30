@@ -8,6 +8,7 @@ import al.antlr4.AluminumParser.ExpressionContext;
 
 public class ALPrintFunction extends ALPredefinedFunction {
 
+	@SuppressWarnings("serial")
 	private static ArrayList<String> params = new ArrayList<String>() {{ add("toPrint"); }};
 	
 	public ALPrintFunction() {
