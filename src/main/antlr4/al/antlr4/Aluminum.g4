@@ -57,7 +57,7 @@ expression : '-' expression                           #unaryMinusExpression
 // Utilities
 exprList : expression (',' expression)*;
 idList : Identifier (',' Identifier)*;
-block : Do Newline statements End;
+block : Do Newline statements Newline End;
 
 
 // Operators
@@ -99,7 +99,8 @@ Return   : 'return';
 
 // Lexer regex
 Boolean : 'true' | 'false';
-Number : [0-9]+;
+Number : [1-9] Digit* | '0';
+
 Identifier : [a-zA-Z_] [a-zA-Z_0-9]*;
 String : ["] (~["\r\n] | '\\\\' | '\\"')* ["]
        | ['] (~['\r\n] | '\\\\' | '\\\'')* [']
@@ -108,3 +109,5 @@ String : ["] (~["\r\n] | '\\\\' | '\\"')* ["]
 // Whitespace
 Comment : ('//' ~[\r\n]* | '/*' .*? '*/') -> skip;
 Space : [ \t\r\n\u000C] -> skip;
+
+fragment Digit : [0-9];

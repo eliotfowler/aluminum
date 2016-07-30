@@ -1,5 +1,5 @@
 print("starting ensures")
-ensure(five() == 5)
+
 // Assignment
 a = 1
 b = 2
@@ -58,10 +58,13 @@ def inNOut(in) do
 	return out
 end
 
-//five = five()
-//ensure(five > 4 && five < 6)
+five = five()
+ensure(five > 4 && five < 6)
 ensure(five() == 5)
 
+ensure(true_func())
 
+ensure(inNOut(1) == 1)
+ensure(inNOut(2^3) == 8) 
 
 print("done")

@@ -122,7 +122,7 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitNumberExpression(NumberExpressionContext ctx) {
-		return new ALObject(Integer.valueOf(ctx.getText()));
+		return new ALObject(Integer.valueOf(ctx.Number().getText()));
 	}
 
 	@Override

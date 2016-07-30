@@ -30,7 +30,7 @@ public class ALFunction {
 		// First assign all the parameters to the function
 		for (int i = 0; i < params.size(); i++) {
 			ALObject value = evalVisitor.visit(args.get(i));
-			scope.assignArgument(args.get(i).getText(), value);
+			scope.assignArgument(params.get(i).getText(), value);
 		}
 		
 		ALObject retVal = ALObject.Void;
