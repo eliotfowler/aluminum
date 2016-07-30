@@ -61,8 +61,8 @@ block : Do Newline statements End;
 
 
 // Operators
-Or       : 'or';
-And      : 'and';
+Or       : 'or' | '||';
+And      : 'and' | '&&';
 Equals   : '==';
 NEquals  : '!=';
 GTEquals : '>=';
