@@ -14,6 +14,8 @@ public class ALObject implements Comparable<ALObject> {
 	public ALObject(Object value) {
 		if (value == null) {
 			throw new RuntimeException("ALObject value is nil");
+		} else if (value instanceof ALObject) {
+			throw new RuntimeException("Value is ALObject");
 		}
 		
 		this.value = value;

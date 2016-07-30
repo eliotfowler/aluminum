@@ -33,7 +33,7 @@ end
 
 i = 0
 while(i < 10) do
-	print_hello
+	print_hello()
 	i = i + 1
 end
 

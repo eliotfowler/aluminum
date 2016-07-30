@@ -208,7 +208,7 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitUnaryMinusExpression(UnaryMinusExpressionContext ctx) {
-		ALObject value = visit(ctx);
+		ALObject value = visit(ctx.expression());
 		
 		if (value.isNumber()) {
 			return new ALObject(-value.asNumber());
@@ -223,7 +223,7 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 		ALObject rhs = visit(ctx.expression(1));
 		
 		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(Math.pow(lhs.asNumber(), rhs.asNumber()));
+			return new ALObject((int)Math.pow(lhs.asNumber(), rhs.asNumber()));
 		}
 		
 		throw new ALEvalException(ctx);
@@ -297,7 +297,7 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 	public ALObject visitFunctionCallExpression(FunctionCallExpressionContext ctx) {
 		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
 		
-		if (ctx.functionCall().arguments() != null) {
+		if (ctx.functionCall().arguments().exprList() != null) {
 			args = ctx.functionCall().arguments().exprList().expression();
 		}
 		
@@ -351,9 +351,11 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 		}
 		
 		if (condition.asBoolean()) {
-			return new ALObject(visit(ctx.expression(1)));
+			ALObject retVal = new ALObject(visit(ctx.expression(1)).asBoolean()); 
+			return retVal;
 		} else {
-			return new ALObject(visit(ctx.expression(2)));
+			ALObject retVal = new ALObject(visit(ctx.expression(2)).asBoolean()); 
+			return retVal;
 		}
 	}
 
