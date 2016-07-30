@@ -38,8 +38,6 @@ Identifier=37
 String=38
 Comment=39
 Space=40
-'||'=1
-'&&'=2
 '=='=3
 '!='=4
 '>='=5

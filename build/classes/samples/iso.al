@@ -1,6 +1,5 @@
-def inNOut(in) do
-	out = in
-	return out
+def alwaysTrue() do
+	return true
 end
 
-ensure(inNOut(1) == 1)
+ensure(alwaysTrue())

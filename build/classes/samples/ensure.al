@@ -33,10 +33,10 @@ ensure(1 + 1 == 2)
 ensure(-1 - -1 == 0)
 
 ensure(-1 - 1 == -2)
-ensure(true && true)
-ensure(true || false)
-ensure(!(true && false))
-ensure(!(false || false))
+ensure(true and true)
+ensure(true or false)
+ensure(!(true and false))
+ensure(!(false and false))
 
 // Ternary
 eIsFive = e == 5 ? true : false
@@ -59,12 +59,19 @@ def inNOut(in) do
 end
 
 five = five()
-ensure(five > 4 && five < 6)
+ensure(five > 4 and five < 6)
 ensure(five() == 5)
 
 ensure(true_func())
 
 ensure(inNOut(1) == 1)
 ensure(inNOut(2^3) == 8) 
+
+// Test while loops
+i = 0
+while i < 10 do
+   i = i + 1
+end
+ensure(i == 10)
 
 print("done")
