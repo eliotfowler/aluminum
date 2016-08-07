@@ -1,7 +1,6 @@
 package main.java.al.antlr4;
 
 import java.util.List;
-import java.util.Map;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -19,23 +18,23 @@ public class ALFunction {
 		this.block = block;
 	}
 	
-	public ALObject invoke(List<ExpressionContext> args, Map<String, ALFunction> functions, ALScope scope) {
+	public ALObject invoke(List<ExpressionContext> args, ALEvalVisitor visitor, ALScope scope) {
 		if (args.size() != params.size()) {
 			throw new RuntimeException("Illegal function call");
 		}
 		
 		scope = new ALScope(scope);
-		ALEvalVisitor evalVisitor = new ALEvalVisitor(scope, functions);
 		
 		// First assign all the parameters to the function
 		for (int i = 0; i < params.size(); i++) {
-			ALObject value = evalVisitor.visit(args.get(i));
+			ALObject value = visitor.visit(args.get(i));
 			scope.assignArgument(params.get(i).getText(), value);
 		}
 		
 		ALObject retVal = ALObject.Void;
 		try {
-			evalVisitor.visit(block);
+			ALEvalVisitor newVisitor = new ALEvalVisitor(visitor); 
+			newVisitor.visit(block);
 		} catch (ALReturnValue returnValue) {
 			retVal = returnValue.value;
 		}

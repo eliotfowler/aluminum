@@ -1,53 +1,23 @@
 package main.java.al.antlr4;
 
-public class ALObject implements Comparable<ALObject> {
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import al.antlr4.AluminumParser.ExpressionContext;
+
+public class ALObject {
 
 	public static final ALObject Nil = new ALObject();
 	public static final ALObject Void = new ALObject();
 	
-	private Object value;
+	protected ALClass runtimeClass;
+	protected Map<String, ALFunction> predefinedFunctions = new HashMap<>();
 	
-	private ALObject() {
-		value = new Object();
-	}
+	protected ALObject() {}
 	
-	public ALObject(Object value) {
-		if (value == null) {
-			throw new RuntimeException("ALObject value is nil");
-		} else if (value instanceof ALObject) {
-			throw new RuntimeException("Value is ALObject");
-		}
-		
-		this.value = value;
-	}
-	
-	@Override
-	public int compareTo(ALObject o) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-	
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj) {
-			return true;
-		} 
-		
-		if (obj == null || getClass() != obj.getClass()) {
-			return false;
-		}
-		
-		ALObject rhs = (ALObject)obj;
-		
-		if (isNumber() && rhs.isNumber()) {
-			return asNumber() == rhs.asNumber();
-		}
-		
-		if (isBoolean() && rhs.isBoolean()) {
-			return asBoolean() == rhs.asBoolean();
-		}
-		
-		return value.equals(rhs.value);
+	public ALObject(ALClass runtimeClass, ALScope scope) {
+		this.runtimeClass = runtimeClass;
 	}
 	
 	public void description() {
@@ -62,24 +32,24 @@ public class ALObject implements Comparable<ALObject> {
 		return this == Void;
 	}
 	
-	public boolean isBoolean() {
-		return value instanceof Boolean;
-	}
-	
-	public boolean isNumber() {
-		return value instanceof Number;
-	}
-	
-	public boolean asBoolean() {
-		return (boolean)value;
-	}
-	
-	public int asNumber() {
-		return (int)value;
-	}
-	
 	@Override
     public String toString() {
-        return isNil() ? "nil" : isVoid() ? "VOID" : String.valueOf(value);
+        return isNil() ? "nil" : isVoid() ? "VOID" : "<" + runtimeClass + ">";
     }
+	
+	public ALObject invokeFunction(String name, List<ExpressionContext> arguments, ALEvalVisitor visitor, ALScope scope) {
+		if (runtimeClass != null) {
+			ALFunction function = runtimeClass.lookupInstanceMethod(name);
+			if (function != null) {
+				return function.invoke(arguments, visitor, scope);
+			}
+		}
+		
+		if (predefinedFunctions.containsKey(name)) {
+			ALFunction function = predefinedFunctions.get(name);
+			return function.invoke(arguments, visitor, scope);
+		}
+		
+		throw new RuntimeException("Function " + name + " doesn't exist for objects of " + this.getClass().getSimpleName());
+	}
 }

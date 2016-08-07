@@ -9,9 +9,9 @@ import al.antlr4.AluminumLexer;
 import al.antlr4.AluminumParser;
 public class AluminumRunner 
 {
-    public static void main( String[] args) throws Exception 
+    public static void main(String[] args) throws Exception 
     {
-        AluminumLexer lexer = new AluminumLexer(new ANTLRFileStream("test/samples/ensure.al"));
+        AluminumLexer lexer = new AluminumLexer(new ANTLRFileStream("test/samples/class.al"));
         AluminumParser parser = new AluminumParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.program();
         
@@ -19,10 +19,13 @@ public class AluminumRunner
         
         ALScope globalScope = ALScope.RootScope;
         
-        ALSymbolVisitor symbolVisitor = new ALSymbolVisitor();
+        ALClassVisitor classVisitor = new ALClassVisitor();
+        classVisitor.visit(tree);
+        
+        ALSymbolVisitor symbolVisitor = new ALSymbolVisitor(classVisitor.getClasses());
         symbolVisitor.visit(tree);
         
-        ALEvalVisitor visitor = new ALEvalVisitor(globalScope, symbolVisitor.getFunctions());
+        ALEvalVisitor visitor = new ALEvalVisitor(globalScope, symbolVisitor.getGlobalFunctions(), classVisitor.getClasses());
         visitor.visit(tree);
     }
 }
