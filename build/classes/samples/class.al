@@ -1,5 +1,5 @@
 class Alpha do
-	def print_beta() do
+	def print_beta do
 		print("beta")
 	end
 end

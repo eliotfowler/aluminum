@@ -45,11 +45,11 @@ ensure(eIsFive)
 ensure(!dIsFive) 
 
 // Test functions
-def five() do
-	return 5
+def five do
+  return 5
 end
 
-def true_func() do
+def true_func do
   return true
 end
 

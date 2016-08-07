@@ -21,12 +21,12 @@ ifStatement : If expression block;
 
 whileStatement : While expression block;
 
-classStatement : Class Identifier (LT Identifier*)? block;
+classStatement : Class Identifier (LT Identifier)? block;
 
 functionCall : (Identifier Period)? Identifier arguments;
 arguments : Parens | OParen exprList CParen;
 
-functionDecl : Def Identifier parameters block;
+functionDecl : Def Identifier parameters? block;
 parameters : Parens | OParen idList CParen;
 
 // Expressions

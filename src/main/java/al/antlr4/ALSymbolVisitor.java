@@ -44,7 +44,8 @@ public class ALSymbolVisitor extends AluminumBaseVisitor<ALObject>{
 	
 	@Override
 	public ALObject visitFunctionDecl(FunctionDeclContext ctx) {
-		List<TerminalNode> params = ctx.parameters().idList() != null ? ctx.parameters().idList().Identifier() : new ArrayList<TerminalNode>();
+		boolean hasParamList = ctx.parameters() != null && ctx.parameters().idList() != null;
+		List<TerminalNode> params = hasParamList ? ctx.parameters().idList().Identifier() : new ArrayList<TerminalNode>();
 		ParseTree block = ctx.block();
 		String id = ctx.Identifier().getText();
 		ALFunction newFunc = new ALFunction(id, params, block);
