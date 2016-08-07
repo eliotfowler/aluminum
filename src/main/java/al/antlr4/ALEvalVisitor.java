@@ -41,7 +41,13 @@ import al.antlr4.AluminumParser.TernaryExpressionContext;
 import al.antlr4.AluminumParser.UnaryMinusExpressionContext;
 import al.antlr4.AluminumParser.WhileStatementContext;
 import main.java.al.antlr4.core.ALBoolean;
+import main.java.al.antlr4.core.ALClass;
+import main.java.al.antlr4.core.ALEvalException;
+import main.java.al.antlr4.core.ALFunction;
 import main.java.al.antlr4.core.ALInt;
+import main.java.al.antlr4.core.ALObject;
+import main.java.al.antlr4.core.ALReturnValue;
+import main.java.al.antlr4.core.ALScope;
 import main.java.al.antlr4.core.ALString;
 
 public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {

@@ -1,4 +1,4 @@
-package main.java.al.antlr4;
+package main.java.al.antlr4.core;
 
 import java.util.HashMap;
 import java.util.Map;

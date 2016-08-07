@@ -1,7 +1,5 @@
 package main.java.al.antlr4.core;
 
-import main.java.al.antlr4.ALObject;
-
 public class ALInt extends ALObject implements Comparable<ALInt> {
 	private int number;
 	

@@ -1,4 +1,4 @@
-package main.java.al.antlr4;
+package main.java.al.antlr4.core;
 
 import java.util.List;
 
@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import al.antlr4.AluminumParser.ExpressionContext;
+import main.java.al.antlr4.ALEvalVisitor;
 
 public class ALFunction {
 	private String name;

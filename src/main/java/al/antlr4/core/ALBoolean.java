@@ -1,7 +1,5 @@
 package main.java.al.antlr4.core;
 
-import main.java.al.antlr4.ALObject;
-
 public class ALBoolean extends ALObject {
 	private boolean value;
 	

@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.tree.Trees;
 
 import al.antlr4.AluminumLexer;
 import al.antlr4.AluminumParser;
+import main.java.al.antlr4.core.ALScope;
 public class AluminumRunner 
 {
     public static void main(String[] args) throws Exception 

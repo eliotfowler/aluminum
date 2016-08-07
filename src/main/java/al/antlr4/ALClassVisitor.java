@@ -5,6 +5,8 @@ import java.util.Map;
 
 import al.antlr4.AluminumBaseVisitor;
 import al.antlr4.AluminumParser.ClassStatementContext;
+import main.java.al.antlr4.core.ALClass;
+import main.java.al.antlr4.core.ALObject;
 
 public class ALClassVisitor extends AluminumBaseVisitor<ALObject> {
 	private Map<String, ALClass> classes;

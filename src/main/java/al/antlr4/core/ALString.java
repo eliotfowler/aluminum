@@ -5,9 +5,6 @@ import java.util.List;
 
 import al.antlr4.AluminumParser.ExpressionContext;
 import main.java.al.antlr4.ALEvalVisitor;
-import main.java.al.antlr4.ALObject;
-import main.java.al.antlr4.ALPredefinedFunction;
-import main.java.al.antlr4.ALScope;
 
 public class ALString extends ALObject {
 	private String string;

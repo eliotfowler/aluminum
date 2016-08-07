@@ -12,6 +12,11 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import al.antlr4.AluminumBaseVisitor;
 import al.antlr4.AluminumParser.ClassStatementContext;
 import al.antlr4.AluminumParser.FunctionDeclContext;
+import main.java.al.antlr4.core.ALClass;
+import main.java.al.antlr4.core.ALEnsureFunction;
+import main.java.al.antlr4.core.ALFunction;
+import main.java.al.antlr4.core.ALObject;
+import main.java.al.antlr4.core.ALPrintFunction;
 
 public class ALSymbolVisitor extends AluminumBaseVisitor<ALObject>{
 	private Map<String, ALFunction> globalFunctions;
