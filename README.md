@@ -12,12 +12,12 @@ What works
  - if statements
  - while loops
  - assignments
+ - class definition and instance creation
  
 What doesn't work that you would otherwise expect to
 ----------------------------------------------------
 
  - no newline at the EOF
- - semi-colons as a terminator
  - pretty much everything else
  
 Sample Aluminum Code:
