@@ -9,22 +9,25 @@ statement : assignment
           | whileStatement
           | functionCall
           | functionDecl
+          | classStatement
 ;
 
 terminator : Newline | SColon;
 
 // Statements
-assignment : Identifier Equals expression;
+assignment : Identifier Assign expression;
 
 ifStatement : If expression block;
 
 whileStatement : While expression block;
 
-functionCall : Identifier arguments;
-arguments : OParen exprList? CParen;
+classStatement : Class Identifier (LT Identifier*)? block;
+
+functionCall : (Identifier Period)? Identifier arguments;
+arguments : Parens | OParen exprList CParen;
 
 functionDecl : Def Identifier parameters block;
-parameters : OParen idList? CParen;
+parameters : Parens | OParen idList CParen;
 
 // Expressions
 expression : Subtract expression                           		#unaryMinusExpression
@@ -39,7 +42,7 @@ expression : Subtract expression                           		#unaryMinusExpressi
            | expression LTEquals expression               		#ltEqExpression
            | expression GT expression                			#gtExpression
            | expression LT expression                			#ltExpression
-           | expression Equals expression              			#eqExpression
+           | expression EqEq expression              			#eqExpression
            | expression NEquals expression               		#notEqExpression
            | expression And expression               			#andExpression
            | expression Or expression               			#orExpression
@@ -59,11 +62,10 @@ exprList : expression (',' expression)*;
 idList : Identifier (',' Identifier)*;
 block : Do Newline statements End;
 
-
 // Operators
 Or       : 'or' | '||';
 And      : 'and' | '&&';
-Equals   : '==';
+EqEq     : '==';
 NEquals  : '!=';
 GTEquals : '>=';
 LTEquals : '<=';
@@ -85,9 +87,11 @@ CParen   : ')';
 SColon   : ';';
 Assign   : '=';
 Comma    : ',';
+Period   : '.';
 QMark    : '?';
 Colon    : ':';
 Newline  : '\n';
+Parens   : '()';
 
 Nil      : 'nil';
 Def      : 'def';
@@ -96,6 +100,7 @@ While    : 'while';
 End      : 'end';
 Do       : 'do';
 Return   : 'return';
+Class    : 'class';
 
 // Lexer regex
 Boolean : 'true' | 'false';

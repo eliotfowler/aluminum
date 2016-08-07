@@ -1,0 +1,10 @@
+Types
+-----
+Object
+String
+Int
+Double
+Array
+Dictionary
+Boolean
+Nil

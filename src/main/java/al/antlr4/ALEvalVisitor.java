@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.v4.runtime.ParserRuleContext;
+
 import al.antlr4.AluminumBaseVisitor;
 import al.antlr4.AluminumParser.AddExpressionContext;
 import al.antlr4.AluminumParser.AndExpressionContext;
 import al.antlr4.AluminumParser.AssignmentContext;
 import al.antlr4.AluminumParser.BlockContext;
 import al.antlr4.AluminumParser.BooleanExpressionContext;
+import al.antlr4.AluminumParser.ClassStatementContext;
 import al.antlr4.AluminumParser.DivideExpressionContext;
 import al.antlr4.AluminumParser.EqExpressionContext;
 import al.antlr4.AluminumParser.ExpressionContext;
@@ -37,24 +40,60 @@ import al.antlr4.AluminumParser.SubtractExpressionContext;
 import al.antlr4.AluminumParser.TernaryExpressionContext;
 import al.antlr4.AluminumParser.UnaryMinusExpressionContext;
 import al.antlr4.AluminumParser.WhileStatementContext;
+import main.java.al.antlr4.core.ALBoolean;
+import main.java.al.antlr4.core.ALClass;
+import main.java.al.antlr4.core.ALEvalException;
+import main.java.al.antlr4.core.ALFunction;
+import main.java.al.antlr4.core.ALInt;
+import main.java.al.antlr4.core.ALObject;
+import main.java.al.antlr4.core.ALReturnValue;
+import main.java.al.antlr4.core.ALScope;
+import main.java.al.antlr4.core.ALString;
 
 public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 	private static ALReturnValue returnValue = new ALReturnValue();
 	private ALScope scope;
-	private Map<String, ALFunction> functions;
+	private Map<String, ALFunction> globalFunctions;
+	private Map<String, ALClass> classes;
 	
-	public ALEvalVisitor(ALScope scope, Map<String, ALFunction> functions) {
+	public ALEvalVisitor(ALScope scope, Map<String, ALFunction> globalFunctions, Map<String, ALClass> classes) {
 		this.scope = scope;
-		this.functions = functions;
+		this.globalFunctions = globalFunctions;
+		this.classes = classes;
+	}
+	
+	public ALEvalVisitor(ALEvalVisitor clone) {
+		this.scope = clone.scope;
+		this.globalFunctions = clone.globalFunctions;
+		this.classes = clone.classes;
 	}
 	
 	@Override
 	public ALObject visitFunctionDecl(FunctionDeclContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		// Check if inside a class
+		boolean insideClass = false;
+		ParserRuleContext parent = ctx.getParent();
+		while (parent != null) {
+			if (parent instanceof ClassStatementContext) {
+				insideClass = true;
+				break;
+			}
+			parent = parent.getParent();
+		}
+		
+		if (insideClass) {
+			
+		}
+		
 		return ALObject.Void;
 	}
 
 	@Override
 	public ALObject visitAssignment(AssignmentContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		ALObject newVal = visit(ctx.expression());
 		String id = ctx.Identifier().getText();
 		scope.assign(id,  newVal);
@@ -64,7 +103,17 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitIfStatement(IfStatementContext ctx) {
-		if (visit(ctx.expression()).asBoolean()) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		ALObject expression = visit(ctx.expression());
+		
+		if (!(expression instanceof ALBoolean)) {
+			throw new ALEvalException(ctx);
+		}
+		
+		boolean boolValue = ((ALBoolean)expression).getValue();
+		
+		if (boolValue) {
 			return visit(ctx.block());
 		}
 		
@@ -73,11 +122,24 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitWhileStatement(WhileStatementContext ctx) {
-		while (visit(ctx.expression()).asBoolean()) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		ALObject expression = visit(ctx.expression());
+		
+		if (!(expression instanceof ALBoolean)) {
+			throw new ALEvalException(ctx);
+		}
+		
+		boolean boolValue = ((ALBoolean)expression).getValue();
+		
+		while (boolValue) {
 			ALObject retVal = visit(ctx.block());
 			if (retVal != ALObject.Void) {
 				return retVal;
 			}
+			
+			expression = visit(ctx.expression());
+			boolValue = ((ALBoolean)expression).getValue();
 		}
 		
 		return ALObject.Void;
@@ -86,11 +148,17 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitLtExpression(LtExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));		
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() < rhs.asNumber());
+		ALObject lhs = visit(ctx.expression(0));
+		ALObject rhs = visit(ctx.expression(1));
+		
+		boolean lhsIsNumber = lhs instanceof ALInt;
+		boolean rhsIsNumber = rhs instanceof ALInt;
+		
+		if (lhsIsNumber && rhsIsNumber) {
+			boolean isLt = ((ALInt)lhs).getInt() < ((ALInt)rhs).getInt();
+			return new ALBoolean(isLt); 
 		}
 		
 		throw new ALEvalException(ctx);
@@ -98,11 +166,19 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitGtExpression(GtExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		ALObject lhs = visit(ctx.expression(0));
 		ALObject rhs = visit(ctx.expression(1));
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() > rhs.asNumber());
+		boolean lhsIsNumber = lhs instanceof ALInt;
+		boolean rhsIsNumber = rhs instanceof ALInt;
+		
+		if (lhsIsNumber && rhsIsNumber) {
+			ALInt lInt = (ALInt)lhs;
+			ALInt rInt = (ALInt)rhs;
+			boolean isGt = lInt.getInt() > rInt.getInt();
+			return new ALBoolean(isGt); 
 		}
 		
 		throw new ALEvalException(ctx);
@@ -110,11 +186,17 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitNotEqExpression(NotEqExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		ALObject lhs = visit(ctx.expression(0));
 		ALObject rhs = visit(ctx.expression(1));
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() != rhs.asNumber());
+		boolean lhsIsNumber = lhs instanceof ALInt;
+		boolean rhsIsNumber = rhs instanceof ALInt;
+		
+		if (lhsIsNumber && rhsIsNumber) {
+			boolean isNe = ((ALInt)lhs).getInt() != ((ALInt)rhs).getInt();
+			return new ALBoolean(isNe); 
 		}
 		
 		throw new ALEvalException(ctx);
@@ -122,204 +204,254 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitNumberExpression(NumberExpressionContext ctx) {
-		return new ALObject(Integer.valueOf(ctx.Number().getText()));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		return new ALInt(Integer.valueOf(ctx.Number().getText()));
 	}
 
 	@Override
 	public ALObject visitIdentifierExpression(IdentifierExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		return scope.resolve(ctx.Identifier().getText());
 	}
 
 	@Override
 	public ALObject visitModulusExpression(ModulusExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() % rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt(lhs.getInt() % rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitNotExpression(NotExpressionContext ctx) {
-		ALObject initVal = visit(ctx.expression());
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (!initVal.isBoolean()) {
+		try {
+			ALBoolean value = (ALBoolean)visit(ctx.expression());
+			return new ALBoolean(!value.getValue());
+		} catch (ClassCastException e) {
 			throw new ALEvalException(ctx);
 		}
-		
-		return new ALObject(!initVal.asBoolean());
 	}
 
 	@Override
 	public ALObject visitMultiplyExpression(MultiplyExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (!lhs.isNumber() || !rhs.isNumber()) {
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt(lhs.getInt() * rhs.getInt());			
+		} catch (ClassCastException e) {
 			throw new ALEvalException(ctx);
 		}
-
-		return new ALObject(lhs.asNumber() * rhs.asNumber());
 	}
 
 	@Override
 	public ALObject visitBooleanExpression(BooleanExpressionContext ctx) {
-		return new ALObject(Boolean.valueOf(ctx.getText()));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
+		return new ALBoolean(Boolean.valueOf(ctx.getText()));
 	}
 
 	@Override
 	public ALObject visitGtEqExpression(GtEqExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() >= rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALBoolean(lhs.getInt() >= rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitDivideExpression(DivideExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() / rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt(lhs.getInt() / rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitOrExpression(OrExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isBoolean() && rhs.isBoolean()) {
-			return new ALObject(lhs.asBoolean() || rhs.asBoolean());
+		try {
+			ALBoolean lhs = (ALBoolean)visit(ctx.expression(0));
+			ALBoolean rhs = (ALBoolean)visit(ctx.expression(1));
+			
+			return new ALBoolean(lhs.getValue() || rhs.getValue());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitUnaryMinusExpression(UnaryMinusExpressionContext ctx) {
-		ALObject value = visit(ctx.expression());
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (value.isNumber()) {
-			return new ALObject(-value.asNumber());
+		try {
+			ALInt value = (ALInt)visit(ctx.expression());
+			return new ALInt(-value.getInt());
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitPowerExpression(PowerExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject((int)Math.pow(lhs.asNumber(), rhs.asNumber()));
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt((int)Math.pow(lhs.getInt(), rhs.getInt()));
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitEqExpression(EqExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		ALObject lhs = visit(ctx.expression(0));
 		ALObject rhs = visit(ctx.expression(1));
 		
 		if (lhs == null && rhs == null) {
-			return new ALObject(true);
+			return new ALBoolean(true);
 		} else if (lhs == null) {
-			return new ALObject(false);
+			return new ALBoolean(false);
 		} else {
-			return new ALObject(lhs.equals(rhs));
+			return new ALBoolean(lhs.equals(rhs));
 		}
 	}
 
 	@Override
 	public ALObject visitAndExpression(AndExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isBoolean() && rhs.isBoolean()) {
-			return new ALObject(lhs.asBoolean() && rhs.asBoolean());
+		try {
+			ALBoolean lhs = (ALBoolean)visit(ctx.expression(0));
+			ALBoolean rhs = (ALBoolean)visit(ctx.expression(1));
+			return lhs.and(rhs);
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitStringExpression(StringExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		String text = ctx.getText();
 		// Remove the quotes
 		text = text.substring(1, text.length() - 1);
 		text = text.replaceAll("////(.)", "$1");
-		return new ALObject(text);
+		return new ALString(text);
 	}
 
 	@Override
 	public ALObject visitExpressionExpression(ExpressionExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		return visit(ctx.expression());
 	}
 
 	@Override
 	public ALObject visitAddExpression(AddExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() + rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt(lhs.getInt() + rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitSubtractExpression(SubtractExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() - rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALInt(lhs.getInt() - rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitFunctionCallExpression(FunctionCallExpressionContext ctx) {
-		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (ctx.functionCall().arguments().exprList() != null) {
-			args = ctx.functionCall().arguments().exprList().expression();
-		}
-		
-		ALFunction function;
-		if ((function = functions.get(ctx.functionCall().Identifier().getText())) != null) {
-			return function.invoke(args, functions, scope);
-		}
-		
-		throw new ALEvalException(ctx);
+		return visit(ctx.functionCall());
 	}
 	
 	@Override
 	public ALObject visitFunctionCall(FunctionCallContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
 		
-		if (ctx.arguments().exprList() != null) {
+		// If there are arguments, parse them
+		if (ctx.arguments() != null && ctx.arguments().exprList() != null) {
 			args = ctx.arguments().exprList().expression();
 		}
 		
 		ALFunction function;
-		if ((function = functions.get(ctx.Identifier().getText())) != null) {
-			return function.invoke(args, functions, scope);
+		
+		// Check if it's a global function
+		if (ctx.Identifier().size() == 1) {
+			// Global function
+			if ((function = globalFunctions.get(ctx.Identifier(0).getText())) != null) {
+				return function.invoke(args, this, scope);
+			}
+		} else if (ctx.Identifier().size() == 2) {
+			// Class function
+			
+			// First check if we're instantiating an object
+			if (classes.containsKey(ctx.Identifier(0).getText()) &&
+					ctx.Identifier(1).getText().equals("create")) {
+				ALClass clazz = classes.get(ctx.Identifier(0).getText());
+				return ALClass.create(clazz, scope);
+			} else {
+				// the first identfier will get us the object to call
+				ALObject object = scope.resolve(ctx.Identifier(0).getText());
+				
+				// the second will be the name of the function
+				String name = ctx.Identifier(1).getText();
+				
+				// call the function
+				return object.invokeFunction(name, args, this, scope);
+			}
+			
+			
 		}
 		
 		throw new ALEvalException(ctx);
@@ -327,40 +459,46 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 
 	@Override
 	public ALObject visitNilExpression(NilExpressionContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		return ALObject.Nil;
 	}
 
 	@Override
 	public ALObject visitLtEqExpression(LtEqExpressionContext ctx) {
-		ALObject lhs = visit(ctx.expression(0));
-		ALObject rhs = visit(ctx.expression(1));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (lhs.isNumber() && rhs.isNumber()) {
-			return new ALObject(lhs.asNumber() <= rhs.asNumber());
+		try {
+			ALInt lhs = (ALInt)visit(ctx.expression(0));
+			ALInt rhs = (ALInt)visit(ctx.expression(1));
+			
+			return new ALBoolean(lhs.getInt() <= rhs.getInt());			
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);
 		}
-		
-		throw new ALEvalException(ctx);
 	}
 
 	@Override
 	public ALObject visitTernaryExpression(TernaryExpressionContext ctx) {
-		ALObject condition = visit(ctx.expression(0));
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
 		
-		if (!condition.isBoolean()) {
-			throw new ALEvalException(ctx);			
-		}
-		
-		if (condition.asBoolean()) {
-			ALObject retVal = new ALObject(visit(ctx.expression(1)).asBoolean()); 
-			return retVal;
-		} else {
-			ALObject retVal = new ALObject(visit(ctx.expression(2)).asBoolean()); 
-			return retVal;
+		try {
+			ALBoolean condition = (ALBoolean)visit(ctx.expression(0));
+			
+			if (condition.getValue()) {
+				return visit(ctx.expression(1));
+			} else {
+				return visit(ctx.expression(2));
+			}
+		} catch (ClassCastException e) {
+			throw new ALEvalException(ctx);	
 		}
 	}
 
 	@Override
 	public ALObject visitBlock(BlockContext ctx) {
+//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
+		
 		scope = new ALScope(scope);
 		for (StatementContext statementCtx : ctx.statements().statement()) {
 			visit(statementCtx);
@@ -376,6 +514,5 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 		scope = scope.parent();
 		return ALObject.Void;
 	}
-	
 	
 }

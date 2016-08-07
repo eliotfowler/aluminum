@@ -1,10 +1,10 @@
-package main.java.al.antlr4;
+package main.java.al.antlr4.core;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import al.antlr4.AluminumParser.ExpressionContext;
+import main.java.al.antlr4.ALEvalVisitor;
 
 public class ALEnsureFunction extends ALPredefinedFunction {
 	@SuppressWarnings("serial")
@@ -15,21 +15,20 @@ public class ALEnsureFunction extends ALPredefinedFunction {
 	}
 
 	@Override
-	public ALObject invoke(List<ExpressionContext> args, Map<String, ALFunction> functions, ALScope scope) {
+	public ALObject invoke(List<ExpressionContext> args, ALEvalVisitor visitor, ALScope scope) {
 		if (args.size() != params.size()) {
 			throw new RuntimeException("Illegal function call");
 		}
 		
 		scope = new ALScope(scope);
-		ALEvalVisitor evalVisitor = new ALEvalVisitor(scope, functions);
-		ALObject value = evalVisitor.visit(args.get(0));
-		
-		if (!value.isBoolean()) {
+		try {
+			ALBoolean value = (ALBoolean)visitor.visit(args.get(0));
+			
+			if (!value.getValue()) {
+				throw new RuntimeException("Ensure failed - " + args.get(0).getText());
+			}
+		} catch (ClassCastException e) {
 			throw new RuntimeException("Illegal function call");
-		}
-		
-		if (!value.asBoolean()) {
-			throw new RuntimeException("Ensure failed - " + args.get(0).getText());
 		}
 		
 		return ALObject.Void;
