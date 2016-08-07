@@ -13,6 +13,7 @@ What works
  - while loops
  - assignments
  - class definition and instance creation
+ - method chaining: "a".append("p").append("p").append("end") --> "append"
  
 What doesn't work that you would otherwise expect to
 ----------------------------------------------------
