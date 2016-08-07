@@ -23,7 +23,13 @@ whileStatement : While expression block;
 
 classStatement : Class Identifier (LT Identifier)? block;
 
-functionCall : (Identifier Period)? Identifier arguments;
+// a.b()
+// a.b().c().d()
+// b().c().d()
+functionCall : Identifier arguments 												#globalFunctionCall
+			 | object Period Identifier arguments									#singleFunctionCall
+			 | object Period Identifier arguments (Period Identifier arguments)+ 	#multipleFunctionCall
+;
 arguments : Parens | OParen exprList CParen;
 
 functionDecl : Def Identifier parameters? block;
@@ -47,13 +53,16 @@ expression : Subtract expression                           		#unaryMinusExpressi
            | expression And expression               			#andExpression
            | expression Or expression               			#orExpression
            | expression QMark expression Colon expression 		#ternaryExpression
-           | Number                                   			#numberExpression
-           | Boolean                                  			#booleanExpression
        	   | Nil                           				        #nilExpression
-           | functionCall                             			#functionCallExpression
-           | Identifier                               			#identifierExpression
-           | String                                   			#stringExpression
+           | functionCall+                             			#functionCallExpression
            | OParen expression CParen                  			#expressionExpression
+           | object												#objectExpression
+;
+
+object : Number          #numberExpression
+       | Boolean		 #booleanExpression
+       | String			 #stringExpression
+       | Identifier		 #identifierExpression
 ;
 
 

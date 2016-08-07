@@ -20,6 +20,7 @@ import al.antlr4.AluminumParser.ExpressionExpressionContext;
 import al.antlr4.AluminumParser.FunctionCallContext;
 import al.antlr4.AluminumParser.FunctionCallExpressionContext;
 import al.antlr4.AluminumParser.FunctionDeclContext;
+import al.antlr4.AluminumParser.GlobalFunctionCallContext;
 import al.antlr4.AluminumParser.GtEqExpressionContext;
 import al.antlr4.AluminumParser.GtExpressionContext;
 import al.antlr4.AluminumParser.IdentifierExpressionContext;
@@ -27,6 +28,7 @@ import al.antlr4.AluminumParser.IfStatementContext;
 import al.antlr4.AluminumParser.LtEqExpressionContext;
 import al.antlr4.AluminumParser.LtExpressionContext;
 import al.antlr4.AluminumParser.ModulusExpressionContext;
+import al.antlr4.AluminumParser.MultipleFunctionCallContext;
 import al.antlr4.AluminumParser.MultiplyExpressionContext;
 import al.antlr4.AluminumParser.NilExpressionContext;
 import al.antlr4.AluminumParser.NotEqExpressionContext;
@@ -34,6 +36,7 @@ import al.antlr4.AluminumParser.NotExpressionContext;
 import al.antlr4.AluminumParser.NumberExpressionContext;
 import al.antlr4.AluminumParser.OrExpressionContext;
 import al.antlr4.AluminumParser.PowerExpressionContext;
+import al.antlr4.AluminumParser.SingleFunctionCallContext;
 import al.antlr4.AluminumParser.StatementContext;
 import al.antlr4.AluminumParser.StringExpressionContext;
 import al.antlr4.AluminumParser.SubtractExpressionContext;
@@ -191,13 +194,26 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 		ALObject lhs = visit(ctx.expression(0));
 		ALObject rhs = visit(ctx.expression(1));
 		
+		// If they are both nil, they are both equal
+		if (lhs == null && rhs == null) {
+			return new ALBoolean(false);
+		}
+		
+		// If only 1 is nil, they are not equal
+		if (lhs == null || rhs == null) {
+			return new ALBoolean(true);
+		}
+		
 		boolean lhsIsNumber = lhs instanceof ALInt;
 		boolean rhsIsNumber = rhs instanceof ALInt;
 		
+		// If they are both numbers, compare the numbers
 		if (lhsIsNumber && rhsIsNumber) {
 			boolean isNe = ((ALInt)lhs).getInt() != ((ALInt)rhs).getInt();
 			return new ALBoolean(isNe); 
 		}
+		
+		
 		
 		throw new ALEvalException(ctx);
 	}
@@ -409,14 +425,18 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 	@Override
 	public ALObject visitFunctionCallExpression(FunctionCallExpressionContext ctx) {
 //		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
-		
-		return visit(ctx.functionCall());
+		ALObject result = null;
+		for (int i = 0; i < ctx.functionCall().size(); i++) {
+			result = visit(ctx.functionCall(i));
+		}
+		return result;
 	}
 	
+	
+	
 	@Override
-	public ALObject visitFunctionCall(FunctionCallContext ctx) {
-//		System.out.println(Thread.currentThread().getStackTrace()[1].getMethodName());
-		
+	public ALObject visitGlobalFunctionCall(GlobalFunctionCallContext ctx) {
+		ALFunction function;
 		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
 		
 		// If there are arguments, parse them
@@ -424,37 +444,62 @@ public class ALEvalVisitor extends AluminumBaseVisitor<ALObject> {
 			args = ctx.arguments().exprList().expression();
 		}
 		
-		ALFunction function;
+		if ((function = globalFunctions.get(ctx.Identifier().getText())) != null) {
+			return function.invoke(args, this, scope);
+		}
+
+		throw new ALEvalException(ctx);
+	}
+
+	@Override
+	public ALObject visitSingleFunctionCall(SingleFunctionCallContext ctx) {
+		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
 		
-		// Check if it's a global function
-		if (ctx.Identifier().size() == 1) {
-			// Global function
-			if ((function = globalFunctions.get(ctx.Identifier(0).getText())) != null) {
-				return function.invoke(args, this, scope);
-			}
-		} else if (ctx.Identifier().size() == 2) {
-			// Class function
-			
-			// First check if we're instantiating an object
-			if (classes.containsKey(ctx.Identifier(0).getText()) &&
-					ctx.Identifier(1).getText().equals("create")) {
-				ALClass clazz = classes.get(ctx.Identifier(0).getText());
-				return ALClass.create(clazz, scope);
-			} else {
-				// the first identfier will get us the object to call
-				ALObject object = scope.resolve(ctx.Identifier(0).getText());
-				
-				// the second will be the name of the function
-				String name = ctx.Identifier(1).getText();
-				
-				// call the function
-				return object.invokeFunction(name, args, this, scope);
-			}
-			
-			
+		// If there are arguments, parse them
+		if (ctx.arguments() != null && ctx.arguments().exprList() != null) {
+			args = ctx.arguments().exprList().expression();
 		}
 		
-		throw new ALEvalException(ctx);
+		// Class function
+		// First check if we're instantiating an object
+		if (classes.containsKey(ctx.object().getText()) &&
+				ctx.Identifier().getText().equals("create")) {
+			ALClass clazz = classes.get(ctx.object().getText());
+			return ALClass.create(clazz, scope);
+		} else {
+			// the first identfier will get us the object to call
+			ALObject object = visit(ctx.object());
+			
+			// the second will be the name of the function
+			String name = ctx.Identifier().getText();
+			
+			// call the function
+			return object.invokeFunction(name, args, this, scope);
+		}
+	}
+
+	@Override
+	public ALObject visitMultipleFunctionCall(MultipleFunctionCallContext ctx) {
+		ALObject object = null;
+		List<ExpressionContext> args = new ArrayList<ExpressionContext>();
+		
+		for (int i = 0; i < ctx.Identifier().size(); i++) {
+			if (object == null) {
+				object = visit(ctx.object());
+			}
+			
+			// If there are arguments, parse them
+			if (ctx.arguments(i) != null && ctx.arguments(i).exprList() != null) {
+				args = ctx.arguments(i).exprList().expression();
+			}
+			
+			// Function name
+			String name = ctx.Identifier(i).getText();
+			
+			object = object.invokeFunction(name, args, this, scope);
+		}
+		
+		return object;
 	}
 
 	@Override

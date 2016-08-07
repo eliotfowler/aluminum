@@ -18,7 +18,7 @@ public class ALPrintFunction extends ALPredefinedFunction {
 	@Override
 	public ALObject invoke(List<ExpressionContext> args, ALEvalVisitor visitor, ALScope scope) {
 		if (args.size() != params.size()) {
-			throw new RuntimeException("Illegal function call");
+			throw new RuntimeException("Illegal call to \"print\" - expected " + params.size() + " arguments but got " + args.size());
 		}
 		
 		scope = new ALScope(scope);

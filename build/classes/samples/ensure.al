@@ -74,4 +74,8 @@ while i < 10 do
 end
 ensure(i == 10)
 
+// Test predefined functions
+append = "a".append("p").append("p").append("e").append("n").append("d")
+ensure(append == "append")
+
 print("done")

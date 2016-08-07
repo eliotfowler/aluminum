@@ -1,5 +1,7 @@
 package main.java.al.antlr4;
 
+import java.util.Arrays;
+
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -16,17 +18,20 @@ public class AluminumRunner
         AluminumParser parser = new AluminumParser(new CommonTokenStream(lexer));
         ParseTree tree = parser.program();
         
-//        System.out.println(Trees.toStringTree(tree, parser));
+        System.out.println("Program tree: " + Trees.toStringTree(tree, parser));
         
         ALScope globalScope = ALScope.RootScope;
         
         ALClassVisitor classVisitor = new ALClassVisitor();
         classVisitor.visit(tree);
         
+        System.out.println("Classes: " + Arrays.toString(classVisitor.getClasses().keySet().toArray()));
+        
         ALSymbolVisitor symbolVisitor = new ALSymbolVisitor(classVisitor.getClasses());
         symbolVisitor.visit(tree);
         
         ALEvalVisitor visitor = new ALEvalVisitor(globalScope, symbolVisitor.getGlobalFunctions(), classVisitor.getClasses());
+        System.out.println("Running program\n");
         visitor.visit(tree);
     }
 }

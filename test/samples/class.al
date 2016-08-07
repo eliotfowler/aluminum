@@ -1,4 +1,4 @@
-class Alpha do
+class Alpha < Int do
 	def print_beta do
 		print("beta")
 	end
