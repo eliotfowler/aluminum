@@ -50,12 +50,12 @@ def five() do
 end
 
 def true_func() do
-	return true
+  return true
 end
 
 def inNOut(in) do
-	out = in
-	return out
+  out = in
+  return out
 end
 
 five = five()
@@ -70,7 +70,7 @@ ensure(inNOut(2^3) == 8)
 // Test while loops
 i = 0
 while i < 10 do
-   i = i + 1
+  i = i + 1
 end
 ensure(i == 10)
 

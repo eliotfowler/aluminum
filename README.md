@@ -58,6 +58,8 @@ hello
 done
 ```
 
+While in this initial development stage, [`ensure.al`](https://github.com/eliotfowler/aluminum/blob/master/test/samples/ensure.al) will have test cases that show the features of the language.
+
 Philosophies/Features
 ============
 
